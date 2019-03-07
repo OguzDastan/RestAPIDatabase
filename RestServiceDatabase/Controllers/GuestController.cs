@@ -4,36 +4,43 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
+using ClassLibrary_Hotel;
+using RestServiceDatabase.DBUtil;
 
 namespace RestServiceDatabase.Controllers
 {
     public class GuestController : ApiController
     {
+        ManageGuest mg = new ManageGuest();
         // GET: api/Guest
-        public IEnumerable<string> Get()
+        public IEnumerable<Guest> Get()
         {
-            return new string[] { "value1", "value2" };
+            return mg.GetAllGuest();
         }
 
         // GET: api/Guest/5
-        public string Get(int id)
+        public Guest Get(int id)
         {
-            return "value";
+            return mg.GetGuestFromId(id);
         }
 
         // POST: api/Guest
-        public void Post([FromBody]string value)
+        public bool Post([FromBody]Guest value)
         {
+            return mg.CreateGuest(value);
         }
 
         // PUT: api/Guest/5
-        public void Put(int id, [FromBody]string value)
+        public bool Put(int id, [FromBody]Guest value)
         {
+            return mg.UpdateGuest(value, id);
         }
 
         // DELETE: api/Guest/5
-        public void Delete(int id)
+        public Guest Delete(int id)
         {
+
+            return mg.DeleteGuest(id);
         }
     }
 }

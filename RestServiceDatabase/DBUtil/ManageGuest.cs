@@ -14,62 +14,115 @@ namespace RestServiceDatabase.DBUtil
 
         public List<Guest> GetAllGuest()
         {
-            queryString = "SELECT * FROM DemoGuest";
-            
+            List<Guest> lg = new List<Guest>();
+            string queryString1 = "SELECT * FROM DemoGuest";
+
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
-                SqlCommand command = new SqlCommand(queryString, connection);
+                SqlCommand command = new SqlCommand(queryString1, connection);
                 command.Connection.Open();
 
-                SqlDataReader reader = command.ExecuteReader();
-
-                while (reader.Read())
+                using (SqlDataReader reader = command.ExecuteReader())
                 {
-                    GetAllGuest().Add(new Guest()
+                    while (reader.Read())
                     {
-                        GuestNo = reader.GetInt32(0),
-                        Name = reader.GetString(1),
-                        Adress = reader.GetString(2)
-
-                    });
+                        lg.Add(new Guest()
+                        {
+                            GuestNo = reader.GetInt32(0),
+                            Name = reader.GetString(1),
+                            Adress = reader.GetString(2)
+                        });
+                    }
                 }
 
-                return GetAllGuest();
+                return lg;
             }
         }
 
         public Guest GetGuestFromId(int guestNr)
         {
-            queryString = "SELECT * FROM DemoGuest WHERE Guest_No = guestNr";
-            int guestID = guestNr;
+            Guest g = new Guest();
+            queryString = $"SELECT * FROM DemoGuest " +
+                          $"WHERE Guest_No = {guestNr}";
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                SqlCommand command = new SqlCommand(queryString, connection);
+                command.Connection.Open();
+                SqlDataReader reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    g.GuestNo = reader.GetInt32(0);
+                }
+                reader.Close();
+                connection.Close();
+            }
+            return g;
+        }
+
+        public bool CreateGuest(Guest guest)
+        {
+            queryString = $"INSERT INTO DemoGuest " +
+                          $"(Guest_No, Name, Address) " +
+                          $"VALUES ({guest.GuestNo}, '{guest.Name}', '{guest.Adress}') ";
+
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 SqlCommand command = new SqlCommand(queryString, connection);
                 command.Connection.Open();
 
-                SqlDataReader reader = command.ExecuteReader();
+                int i = command.ExecuteNonQuery();
 
-                while (reader.Read())
+                if (i > 0)
                 {
-                    guestNr = reader.GetInt32(0);
+                    return true;
                 }
-            }
-            return GetGuestFromId(guestID);
-        }
 
-        public bool CreateGuest(Guest guest)
-        {
-            throw new NotImplementedException();
+                command.Clone();
+                connection.Close();
+            }
+            return false;
         }
 
         public bool UpdateGuest(Guest guest, int guestNr)
         {
-            throw new NotImplementedException();
+            queryString = $"UPDATE DemoGuest SET " +
+                          $"Name = '{guest.Name}', " +
+                          $"Address = '{guest.Adress}' " +
+                          $"WHERE Guest_No = {guestNr}";
+
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                SqlCommand command = new SqlCommand(queryString, connection);
+                command.Connection.Open();
+
+                int i = command.ExecuteNonQuery();
+
+                if (i > 0)
+                {
+                    return true;
+                }
+                command.Clone();
+                connection.Close();
+            }
+            return false;
         }
 
         public Guest DeleteGuest(int guestNr)
         {
-            throw new NotImplementedException();
+            Guest g = new Guest();
+            
+            queryString = $"DELETE FROM DemoGuest " +
+                          $"WHERE Guest_No = {guestNr}";
+
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                SqlCommand command = new SqlCommand(queryString, connection);
+                command.Connection.Open();
+
+                command.ExecuteNonQuery();
+            }
+            return g;
         }
     }
 }
